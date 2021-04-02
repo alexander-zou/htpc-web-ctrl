@@ -15,7 +15,6 @@ from flask import Flask
 from flask import request
 from flask import session
 from flask import render_template, redirect, abort, send_from_directory
-from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = 'shelf'
 INVALID_FILENAMES = {
@@ -59,7 +58,10 @@ def upload():
     abort( 400, 'Missing data')
 
 if __name__ == '__main__':
-    app.run()
+    abspath = os.path.abspath( __file__)
+    dname = os.path.dirname( abspath)
+    os.chdir( dname)
+    app.run( host='0.0.0.0', port=5000)
 
 # End of 'test.py' 
 

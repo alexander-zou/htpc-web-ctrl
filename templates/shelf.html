@@ -4,9 +4,8 @@
 {% block title %}Files{% endblock %}
 
 {% block content %}
-    <form action="/upload" method="post" enctype="multipart/form-data">
+    <form id="upload_form" action="/upload" method="post" enctype="multipart/form-data">
         <input type="file" name="file"/>
-        <input type="submit" value="upload"/>
     </form>
     <div>
     {% for file in files %}
@@ -15,5 +14,11 @@
         </ul>
     {% endfor %}
     </div>
+    <script type="text/javascript">
+        document.getElementById("upload_form").onchange = function() {
+            // submitting the form
+            document.getElementById("upload_form").submit();
+        };
+    </script>
 {% endblock %}
 
