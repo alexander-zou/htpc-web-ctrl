@@ -14,14 +14,17 @@ import os, time, hashlib
 from flask import Flask
 from flask import request
 from flask import render_template, redirect, abort, send_from_directory
+import pyautogui
 
 PASS = '123456'
-EXPIRATION_SEC = 30
+EXPIRATION_SEC = 3600 * 24 * 30
 UPLOAD_FOLDER = 'shelf'
 INVALID_FILENAMES = {
     '', 'CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
     'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
 }
+pyautogui.FAILSAFE = False
+is_mouse_down = False
 
 app = Flask(__name__)
 app.config[ 'UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -57,6 +60,47 @@ def shelf():
         return redirect( '/login?url=/shelf')
     os.makedirs( UPLOAD_FOLDER, exist_ok=True)
     return render_template( 'shelf.html', files=os.listdir( UPLOAD_FOLDER))
+
+@app.route( '/input')
+def input():
+    if not is_login():
+        return redirect( '/login?url=/input')
+    return render_template( 'input.html')
+
+@app.route( '/api', methods=['POST','GET'])
+def api():
+    global is_mouse_down
+    if not is_login():
+        abort( 401, 'Must login first')
+    if request.values[ 'evt'] == 'click':
+        if is_mouse_down:
+            pyautogui.mouseUp()
+            is_mouse_down = False
+        else:
+            pyautogui.click()
+    elif request.values[ 'evt'] == 'dbclick':
+        # if is_mouse_down:
+        #     pyautogui.mouseUp()
+        #     is_mouse_down = False
+        # else:
+            pyautogui.rightClick()
+    elif request.values[ 'evt'] == 'drag':
+        if is_mouse_down:
+            pyautogui.mouseUp()
+            is_mouse_down = False
+        else:
+            pyautogui.mouseDown()
+            is_mouse_down = True
+    elif request.values[ 'evt'] == 'move':
+        x, y = int( request.values[ 'x']), int( request.values[ 'y'])
+        l2 = x**2 + y**2
+        k = l2/20000.0 + 19999/20000.0
+        pyautogui.moveRel( x*k, y*k, 0.02)
+    elif request.values[ 'evt'] == 'scroll':
+        x, y = int( request.values[ 'x']), int( request.values[ 'y'])
+        pyautogui.scroll( -y)
+        pyautogui.hscroll( -x)
+    return 'OK'
 
 @app.route( '/download/<string:name>')
 def download( name):
