@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<TITLE>{% block title %}{% endblock %}</TITLE>
+
+<nav>
+    <ul>
+        <li><a href="/">Index</a></li>
+        <li><a href="/shelf">Shelf</a></li>
+    </ul>
+</nav>
+
+<section class="content">
+    {% for message in get_flashed_messages() %}
+        <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+</section>
