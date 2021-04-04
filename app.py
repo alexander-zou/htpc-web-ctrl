@@ -17,7 +17,7 @@ from flask import render_template, redirect, abort, send_from_directory
 import pyautogui
 
 PASS = '123456'
-EXPIRATION_SEC = 3600 * 24 * 30
+EXPIRATION_SEC = 60 * 60
 UPLOAD_FOLDER = 'shelf'
 INVALID_FILENAMES = {
     '', 'CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
@@ -79,11 +79,7 @@ def api():
         else:
             pyautogui.click()
     elif request.values[ 'evt'] == 'dbclick':
-        # if is_mouse_down:
-        #     pyautogui.mouseUp()
-        #     is_mouse_down = False
-        # else:
-            pyautogui.rightClick()
+        pyautogui.rightClick()
     elif request.values[ 'evt'] == 'drag':
         if is_mouse_down:
             pyautogui.mouseUp()
@@ -100,6 +96,9 @@ def api():
         x, y = int( request.values[ 'x']), int( request.values[ 'y'])
         pyautogui.scroll( -y)
         pyautogui.hscroll( -x)
+    elif request.values[ 'evt'] == 'key':
+        # print( 'KEY: ', request.values[ 'keys'].split( '|'))
+        pyautogui.hotkey( *tuple( request.values[ 'keys'].split( '|')))
     return 'OK'
 
 @app.route( '/download/<string:name>')

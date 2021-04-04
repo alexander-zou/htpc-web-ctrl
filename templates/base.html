@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <TITLE>{% block title %}{% endblock %} - HTPC Web Ctrl</TITLE>
-
-<nav>
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/input">Input</a></li>
-        <li><a href="/shelf">Shelf</a></li>
-    </ul>
-</nav>
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<style>
+ 	.navli {
+		text-align: center;
+		display: inline-block;
+        width: 72px;
+        height: 32px;
+        line-height: 32px;
+        background-color: grey;
+	}
+    .nava {
+        color:honeydew;
+        text-decoration:none;
+    }
+</style>
 
 <section class="content">
     {% for message in get_flashed_messages() %}
@@ -15,3 +22,11 @@
     {% endfor %}
     {% block content %}{% endblock %}
 </section>
+
+<nav style="position: fixed;right:6%;top:16px">
+    <ul style="list-style-type:none;padding:0;margin:0;">
+        <li class="navli"><a class="nava" href="/">首页</a></li>
+        <li class="navli"><a class="nava" href="/input">键鼠</a></li>
+        <li class="navli"><a class="nava" href="/shelf">文件</a></li>
+    </ul>
+</nav>
