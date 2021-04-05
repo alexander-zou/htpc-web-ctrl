@@ -10,7 +10,7 @@
 
 '''
 
-import os, time, hashlib
+import os, time, hashlib, webbrowser
 from flask import Flask
 from flask import request
 from flask import render_template, redirect, abort, send_from_directory
@@ -24,7 +24,60 @@ INVALID_FILENAMES = {
     'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
 }
 pyautogui.FAILSAFE = False
+
+def power_off():
+    os.system( 'shutdown -s')
+    # print( 'Power Off!')
+
+def open_browser( browser=None):
+    if browser is None:
+        browser = 'chrome'
+    os.startfile( browser)
+
+def open_page( url, browser=None):
+    if browser == 'chrome':
+        webbrowser.get( 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s').open_new( url)
+    elif browser == 'firefox':
+        webbrowser.get( 'C:/Program Files/Mozilla Firefox/firefox.exe %s').open_new( url)
+    elif browser == 'edge':
+        webbrowser.get( 'C:/Program Files/Microsoft/Edge/Application/msedge.exe %s').open_new( url)
+    else:
+        webbrowser.open_new( url)
+
+FIXED_BUTTONS = [ "⦿", "ESC", "空格", "⏎", "⇦", "⇨", "⇧", "⇩", "🔊+", "🔉-"]
+FIXED_BUTTON_FUNCTIONS = [
+    power_off,
+    'esc',
+    'space',
+    'enter',
+    'left',
+    'right',
+    'up',
+    'down',
+    'volumeup',
+    'volumedown',
+]
+GRID_BUTTONS = [ "⏮", "⏯", "⏭︎", 'PgUp', 'PgDn', "音响", "切换", "关闭", "桌面", "开始", "浏览器", "刷新", "关标签", "菜单", "最大化"]
+GRID_BUTTON_FUNCTIONS = [
+    'prevtrack',
+    'playpause',
+    'prevtrack',
+    'pageup',
+    'pagedown',
+    'volumemute',
+    ( 'ctrl', 'alt', 'tab'),
+    ( 'alt', 'f4'),
+    ( 'win', 'd'),
+    ( 'ctrl', 'esc'),
+    open_browser,
+    'browserrefresh',
+    ( 'ctrl', 'w'),
+    'apps',
+    ( 'win', 'up'),
+]
+
 is_mouse_down = False
+
 
 app = Flask(__name__)
 app.config[ 'UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -52,7 +105,7 @@ def is_login():
 def homepage():
     if not is_login():
         return redirect( '/login?url=/')
-    return render_template( 'index.html')
+    return render_template( 'index.html', grid_btn_text=GRID_BUTTONS, fixed_btn_text=FIXED_BUTTONS)
 
 @app.route( '/shelf')
 def shelf():
@@ -99,6 +152,25 @@ def api():
     elif request.values[ 'evt'] == 'key':
         # print( 'KEY: ', request.values[ 'keys'].split( '|'))
         pyautogui.hotkey( *tuple( request.values[ 'keys'].split( '|')))
+    return 'OK'
+
+@app.route( '/button', methods=['POST','GET'])
+def button():
+    if not is_login():
+        abort( 401, 'Must login first')
+    id = int( request.values[ 'id'])
+    if request.values[ 't'] == 'fixed':
+        func = FIXED_BUTTON_FUNCTIONS[ id]
+    elif request.values[ 't'] == 'grid':
+        func = GRID_BUTTON_FUNCTIONS[ id]
+    else:
+        abort( 400, 'Wrong arguments')
+    if type( func) is str:
+        pyautogui.press( func)
+    elif type( func) is tuple:
+        pyautogui.hotkey( *func)
+    elif callable( func):
+        func()
     return 'OK'
 
 @app.route( '/download/<string:name>')
@@ -150,6 +222,10 @@ def login():
     else:
         url = '/'
     return render_template( 'login.html', url=url)
+
+@app.route( '/favicon.ico')
+def icon():
+    return send_from_directory( 'statics', 'favicon.ico')
 
 if __name__ == '__main__':
     abspath = os.path.abspath( __file__)

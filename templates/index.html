@@ -2,5 +2,78 @@
 
 {% block title %}Index{% endblock %}
 
-{% block content %} Hello, World! {% endblock %}
+{% block content %}
+<style>
+.button {
+    height:40px;
+    width: 64px;
+    line-height: 20px;
+    text-align: center;
+    margin: 4px;
+}
+.fixed-row {
+    height:48px;
+    display: grid;
+    grid-template-columns: repeat( 5, 20%);
+}
+.hidden {
+    visibility: hidden;
+}
+.power{
+    color:red;
+}
+
+</style>
+
+<div style="margin-top:18px">
+    <div class="fixed-row">
+        <button class="button power" onclick="call_api('button?t=fixed&id=0');">{{ fixed_btn_text[0] }}</button>
+        <button class="button hidden"></button>
+        <button class="button hidden"></button>
+        <button class="button hidden"></button>
+        <button class="button hidden"></button>
+    </div>
+    <div class="fixed-row">
+        <button class="button" onclick="call_api('button?t=fixed&id=1');">{{ fixed_btn_text[1] }}</button>
+        <button class="button hidden"></button>
+        <button class="button" onclick="call_api('button?t=fixed&id=6');">{{ fixed_btn_text[6] }}</button>
+        <button class="button hidden"></button>
+        <button class="button" onclick="call_api('button?t=fixed&id=8');">{{ fixed_btn_text[8] }}</button>
+    </div>
+    <div class="fixed-row">
+        <button class="button hidden"></button>
+        <button class="button" onclick="call_api('button?t=fixed&id=4');">{{ fixed_btn_text[4] }}</button>
+        <button class="button" onclick="call_api('button?t=fixed&id=3');">{{ fixed_btn_text[3] }}</button>
+        <button class="button" onclick="call_api('button?t=fixed&id=5');">{{ fixed_btn_text[5] }}</button>
+        <button class="button hidden"></button>
+    </div>
+    <div class="fixed-row">
+        <button class="button" onclick="call_api('button?t=fixed&id=2');">{{ fixed_btn_text[2] }}</button>
+        <button class="button hidden"></button>
+        <button class="button" onclick="call_api('button?t=fixed&id=7');">{{ fixed_btn_text[7] }}</button>
+        <button class="button hidden"></button>
+        <button class="button" onclick="call_api('button?t=fixed&id=9');">{{ fixed_btn_text[9] }}</button>
+    </div>
+</div>
+
+<div style="margin-top:20px;width:100%">
+    </div style="margin-top:10px;margin-left:10px">
+    {% for t in grid_btn_text %}
+    <button class="button" onclick="call_api('button?t=grid&id={{ loop.index0 }}');">
+        <span>{{ t }}</span>
+    </button>
+    {% endfor %}
+    </dev>
+</div>
+
+<script>
+
+function call_api( url) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", url, false);
+    xhttp.send();
+}
+
+</script>
+{% endblock %}
 
