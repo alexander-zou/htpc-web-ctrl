@@ -1,0 +1,63 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Text{% endblock %}
+
+{% block content %}
+
+<style>
+    .button {
+        height:40px;
+        width: 160px;
+        line-height: 40px;
+        text-align: center;
+        margin: 4px;
+        display: inline-block;
+    }
+    
+</style>
+
+<div style="margin-top:54px">
+    <textarea id="text" rows="5" style="width:96%;"></textarea>
+    <button class="button" onclick="get_text();">从电脑粘贴板读取↓</button>
+    <button class="button" onclick="send_text();">上传至电脑粘贴板↑</button>
+    <button class="button" onclick="open_url();">打开URL</button>
+    <button class="button" onclick="open_by( 'chrome');">用Chrome打开</button>
+    <button class="button" onclick="open_by( 'firefox');">用Firefox打开</button>
+    <button class="button" onclick="open_by( 'edge');">用Edge打开</button>
+</div>
+
+<script>
+
+    function get_text() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", '/text?cmd=get&txt=', false);
+        xhttp.onreadystatechange=function() {
+            if ( xhttp.readyState==4) {
+                document.getElementById('text').value = xhttp.responseText
+            }
+        }
+        xhttp.send();
+    }
+
+    function send_text() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", '/text?cmd=send&txt=' + encodeURIComponent( document.getElementById('text').value), false);
+        xhttp.send();
+    }
+
+    function open_url() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", '/text?cmd=url&txt=' + encodeURIComponent( document.getElementById('text').value), false);
+        xhttp.send();
+    }
+
+    function open_by( browser) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", '/text?cmd=' + browser + '&txt=' + encodeURIComponent( document.getElementById('text').value), false);
+        xhttp.send();
+    }
+
+</script>
+{% endblock %}
+

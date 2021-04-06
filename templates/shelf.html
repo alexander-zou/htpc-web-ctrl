@@ -7,7 +7,6 @@
 
     <style>
         .row {
-            background-color: #eee;
             margin: 6px;
         }
         .uploaded {
@@ -16,11 +15,20 @@
         }
         .cell {
             display: inline-block;
+            background-color: #e6e6e6;
+            margin: 1px;
+            padding: 5px;
+        }
+        .center {
+            text-align: center;
+        }
+        .right {
+            text-align: right;
         }
     </style>
 
     <div style="margin-top:54px">
-        <div class="row">
+        <div class="row" style="width:320px;">
             <form id="upload_form" action="/upload" method="post" enctype="multipart/form-data">
             <label for="file">[上传]</label>
             <input type="file" name="file"/>
@@ -28,10 +36,10 @@
         </div>
     {% for file in files %}
         <div class="row uploaded">
-            <div class="cell"><a href="/download/{{ file }}">{{ file[0] }}</a></div>
-            <div class="cell">{{ file[1] }}</div>
-            <div class="cell" onclick="file_op( 'open', '{{ file[0] }}');">📖</div>
-            <div class="cell" onclick="file_op( 'delete', '{{ file[0] }}');">❌</div>
+            <div class="cell"><a href="/download/{{ file[0] }}">{{ file[0] }}</a></div>
+            <div class="cell center">{{ file[1] }}</div>
+            <div class="cell center" onclick="file_op( 'open', '{{ file[0] }}');">📖</div>
+            <div class="cell center" onclick="file_op( 'delete', '{{ file[0] }}');">❌</div>
         </div>
     {% endfor %}
     </div>

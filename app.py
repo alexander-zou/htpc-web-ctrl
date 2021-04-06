@@ -14,11 +14,13 @@ import os, time, hashlib, webbrowser
 from flask import Flask
 from flask import request
 from flask import render_template, redirect, abort, send_from_directory
-import pyautogui
+import pyautogui, pyperclip
 
 PASS = '123456'
 EXPIRATION_SEC = 60 * 60
 UPLOAD_FOLDER = 'shelf'
+DEFAULT_BROWSER = 'chrome'
+
 INVALID_FILENAMES = {
     '', 'CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
     'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
@@ -31,7 +33,7 @@ def power_off():
 
 def open_browser( browser=None):
     if browser is None:
-        browser = 'chrome'
+        browser = DEFAULT_BROWSER
     os.startfile( browser)
 
 def open_page( url, browser=None):
@@ -40,7 +42,7 @@ def open_page( url, browser=None):
     elif browser == 'firefox':
         webbrowser.get( 'C:/Program Files/Mozilla Firefox/firefox.exe %s').open_new( url)
     elif browser == 'edge':
-        webbrowser.get( 'C:/Program Files/Microsoft/Edge/Application/msedge.exe %s').open_new( url)
+        webbrowser.get( 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe %s').open_new( url)
     else:
         webbrowser.open_new( url)
 
@@ -83,7 +85,7 @@ app.config[ 'UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def readable_size( bytes):
     if bytes < 1024:
-        return str( bytes) + 'bytes'
+        return str( bytes) + 'Bytes'
     kb = bytes / 1024.0
     if kb < 1024:
         return '%.2fKB' % ( kb)
@@ -135,6 +137,25 @@ def shelf():
         if os.path.isfile( path):
             files.append( ( name, readable_size( os.path.getsize( path))))
     return render_template( 'shelf.html', files=files)
+
+@app.route( '/text', methods=['POST','GET'])
+def text():
+    if request.method == 'POST':
+        cmd = request.values[ 'cmd']
+        txt = request.values[ 'txt']
+        if 'get' == cmd:
+            return pyperclip.paste()
+        elif 'send' == cmd:
+            pyperclip.copy( txt)
+        elif 'url' == cmd:
+            os.startfile( txt)
+        elif cmd in ( 'chrome', 'firefox', 'edge'):
+            open_page( txt, cmd)
+        return 'OK'
+    else:
+        if not is_login():
+            return redirect( '/login?url=/text')
+        return render_template( 'text.html')
 
 @app.route( '/input')
 def input():
