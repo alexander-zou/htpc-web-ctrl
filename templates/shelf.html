@@ -4,23 +4,47 @@
 {% block title %}Files{% endblock %}
 
 {% block content %}
-    <div>
-    <form id="upload_form" action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file"/>
-    </form>
-    </div>
-    <div>
+
+    <style>
+        .row {
+            background-color: #eee;
+            margin: 6px;
+        }
+        .uploaded {
+            display: grid;
+            grid-template-columns: 60% 15% 8% 8%;
+        }
+        .cell {
+            display: inline-block;
+        }
+    </style>
+
+    <div style="margin-top:54px">
+        <div class="row">
+            <form id="upload_form" action="/upload" method="post" enctype="multipart/form-data">
+            <label for="file">[上传]</label>
+            <input type="file" name="file"/>
+            </form>
+        </div>
     {% for file in files %}
-        <ul>
-            <a href="/download/{{ file }}">{{ file }}</a>
-        </ul>
+        <div class="row uploaded">
+            <div class="cell"><a href="/download/{{ file }}">{{ file[0] }}</a></div>
+            <div class="cell">{{ file[1] }}</div>
+            <div class="cell" onclick="file_op( 'open', '{{ file[0] }}');">📖</div>
+            <div class="cell" onclick="file_op( 'delete', '{{ file[0] }}');">❌</div>
+        </div>
     {% endfor %}
     </div>
     <script type="text/javascript">
         document.getElementById("upload_form").onchange = function() {
-            // submitting the form
             document.getElementById("upload_form").submit();
         };
+        function file_op( op, file) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "/file/" + op + "/" + file, false);
+            xhttp.send();
+            location.reload(true);
+        }
     </script>
 {% endblock %}
 

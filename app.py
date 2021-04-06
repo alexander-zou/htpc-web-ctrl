@@ -78,9 +78,26 @@ GRID_BUTTON_FUNCTIONS = [
 
 is_mouse_down = False
 
-
 app = Flask(__name__)
 app.config[ 'UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def readable_size( bytes):
+    if bytes < 1024:
+        return str( bytes) + 'bytes'
+    kb = bytes / 1024.0
+    if kb < 1024:
+        return '%.2fKB' % ( kb)
+    mb = kb / 1024.0
+    if mb < 1024:
+        return '%.2fMB' % ( mb)
+    gb = mb / 1024.0
+    if gb < 1024:
+        return '%.2fGB' % ( gb)
+    tb = gb / 1024.0
+    if tb < 1024:
+        return '%.2fTB' % ( tb)
+    pb = tb / 1024.0
+    return '%.2fPB' % ( pb)
 
 def generate_token( ip, ts):
     md5 = hashlib.md5()
@@ -112,7 +129,12 @@ def shelf():
     if not is_login():
         return redirect( '/login?url=/shelf')
     os.makedirs( UPLOAD_FOLDER, exist_ok=True)
-    return render_template( 'shelf.html', files=os.listdir( UPLOAD_FOLDER))
+    files = []
+    for name in os.listdir( UPLOAD_FOLDER):
+        path = os.path.join( UPLOAD_FOLDER, name)
+        if os.path.isfile( path):
+            files.append( ( name, readable_size( os.path.getsize( path))))
+    return render_template( 'shelf.html', files=files)
 
 @app.route( '/input')
 def input():
@@ -178,6 +200,19 @@ def download( name):
     if not is_login():
         abort( 401, 'Must login first')
     return send_from_directory( 'shelf', name)
+
+@app.route( '/file/<string:op>/<string:file>', methods=['POST','GET'])
+def file_op( op, file):
+    if not is_login():
+        abort( 401, 'Must login first')
+    path = os.path.join( UPLOAD_FOLDER, file)
+    if not os.path.exists( path):
+        abort( 404)
+    if 'open' == op:
+        os.startfile( path)
+    elif 'delete' == op:
+        os.remove( path)
+    return 'OK'
 
 @app.route( '/upload', methods=['POST'])
 def upload():
