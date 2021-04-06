@@ -4,9 +4,11 @@
 {% block title %}Files{% endblock %}
 
 {% block content %}
+    <div>
     <form id="upload_form" action="/upload" method="post" enctype="multipart/form-data">
         <input type="file" name="file"/>
     </form>
+    </div>
     <div>
     {% for file in files %}
         <ul>

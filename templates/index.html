@@ -7,9 +7,13 @@
 .button {
     height:40px;
     width: 64px;
-    line-height: 20px;
+    line-height: 40px;
     text-align: center;
     margin: 4px;
+    display: inline-block;
+    background-color: #ddd;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
 }
 .fixed-row {
     height:48px;
@@ -25,43 +29,43 @@
 
 </style>
 
-<div style="margin-top:18px">
+<div style="margin-top:18px;max-width:480px;">
     <div class="fixed-row">
-        <button class="button power" onclick="call_api('button?t=fixed&id=0');">{{ fixed_btn_text[0] }}</button>
-        <button class="button hidden"></button>
-        <button class="button hidden"></button>
-        <button class="button hidden"></button>
-        <button class="button hidden"></button>
+        <div class="button power" onclick="call_api('button?t=fixed&id=0');">{{ fixed_btn_text[0] }}</div>
+        <div class="button hidden"></div>
+        <div class="button hidden"></div>
+        <div class="button hidden"></div>
+        <div class="button hidden"></div>
     </div>
     <div class="fixed-row">
-        <button class="button" onclick="call_api('button?t=fixed&id=1');">{{ fixed_btn_text[1] }}</button>
-        <button class="button hidden"></button>
-        <button class="button" onclick="call_api('button?t=fixed&id=6');">{{ fixed_btn_text[6] }}</button>
-        <button class="button hidden"></button>
-        <button class="button" onclick="call_api('button?t=fixed&id=8');">{{ fixed_btn_text[8] }}</button>
+        <div class="button" onclick="call_api('button?t=fixed&id=1');">{{ fixed_btn_text[1] }}</div>
+        <div class="button hidden"></div>
+        <div class="button" onclick="call_api('button?t=fixed&id=6');">{{ fixed_btn_text[6] }}</div>
+        <div class="button hidden"></div>
+        <div class="button" onclick="call_api('button?t=fixed&id=8');">{{ fixed_btn_text[8] }}</div>
     </div>
     <div class="fixed-row">
-        <button class="button hidden"></button>
-        <button class="button" onclick="call_api('button?t=fixed&id=4');">{{ fixed_btn_text[4] }}</button>
-        <button class="button" onclick="call_api('button?t=fixed&id=3');">{{ fixed_btn_text[3] }}</button>
-        <button class="button" onclick="call_api('button?t=fixed&id=5');">{{ fixed_btn_text[5] }}</button>
-        <button class="button hidden"></button>
+        <div class="button hidden"></div>
+        <div class="button" onclick="call_api('button?t=fixed&id=4');">{{ fixed_btn_text[4] }}</div>
+        <div class="button" onclick="call_api('button?t=fixed&id=3');">{{ fixed_btn_text[3] }}</div>
+        <div class="button" onclick="call_api('button?t=fixed&id=5');">{{ fixed_btn_text[5] }}</div>
+        <div class="button hidden"></div>
     </div>
     <div class="fixed-row">
-        <button class="button" onclick="call_api('button?t=fixed&id=2');">{{ fixed_btn_text[2] }}</button>
-        <button class="button hidden"></button>
-        <button class="button" onclick="call_api('button?t=fixed&id=7');">{{ fixed_btn_text[7] }}</button>
-        <button class="button hidden"></button>
-        <button class="button" onclick="call_api('button?t=fixed&id=9');">{{ fixed_btn_text[9] }}</button>
+        <div class="button" onclick="call_api('button?t=fixed&id=2');">{{ fixed_btn_text[2] }}</div>
+        <div class="button hidden"></div>
+        <div class="button" onclick="call_api('button?t=fixed&id=7');">{{ fixed_btn_text[7] }}</div>
+        <div class="button hidden"></div>
+        <div class="button" onclick="call_api('button?t=fixed&id=9');">{{ fixed_btn_text[9] }}</div>
     </div>
 </div>
 
 <div style="margin-top:20px;width:100%">
     </div style="margin-top:10px;margin-left:10px">
     {% for t in grid_btn_text %}
-    <button class="button" onclick="call_api('button?t=grid&id={{ loop.index0 }}');">
+    <div class="button" onclick="call_api('button?t=grid&id={{ loop.index0 }}');">
         <span>{{ t }}</span>
-    </button>
+    </div>
     {% endfor %}
     </dev>
 </div>

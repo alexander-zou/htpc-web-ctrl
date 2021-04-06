@@ -26,7 +26,7 @@ INVALID_FILENAMES = {
 pyautogui.FAILSAFE = False
 
 def power_off():
-    os.system( 'shutdown -s')
+    os.system( 'shutdown -s -t 0')
     # print( 'Power Off!')
 
 def open_browser( browser=None):
@@ -44,7 +44,7 @@ def open_page( url, browser=None):
     else:
         webbrowser.open_new( url)
 
-FIXED_BUTTONS = [ "⦿", "ESC", "空格", "⏎", "⇦", "⇨", "⇧", "⇩", "🔊+", "🔉-"]
+FIXED_BUTTONS = [ "⦿", "ESC", "空格", "Enter", "⇦", "⇨", "⇧", "⇩", "🔊+", "🔉-"]
 FIXED_BUTTON_FUNCTIONS = [
     power_off,
     'esc',
