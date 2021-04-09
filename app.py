@@ -16,8 +16,8 @@ from flask import request
 from flask import render_template, redirect, abort, send_from_directory
 import pyautogui, pyperclip
 
-PASS = '123456'
-EXPIRATION_SEC = 60 * 60
+PASS = '1234'
+EXPIRATION_SEC = 60 * 60 * 24 * 30
 UPLOAD_FOLDER = 'shelf'
 DEFAULT_BROWSER = 'chrome'
 
@@ -186,7 +186,7 @@ def api():
     elif request.values[ 'evt'] == 'move':
         x, y = int( request.values[ 'x']), int( request.values[ 'y'])
         l2 = x**2 + y**2
-        k = l2/20000.0 + 19999/20000.0
+        k = l2/20000.0 + 1.05
         pyautogui.moveRel( x*k, y*k, 0.02)
     elif request.values[ 'evt'] == 'scroll':
         x, y = int( request.values[ 'x']), int( request.values[ 'y'])
