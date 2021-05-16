@@ -16,7 +16,7 @@ from flask import request
 from flask import render_template, redirect, abort, send_from_directory
 import pyautogui, pyperclip
 
-PASS = '1234'
+PASS = '123'
 EXPIRATION_SEC = 60 * 60 * 24 * 30
 UPLOAD_FOLDER = 'shelf'
 DEFAULT_BROWSER = 'chrome'
@@ -256,6 +256,19 @@ def upload():
         return redirect( '/shelf')
     abort( 400, 'Missing data')
 
+@app.route( '/screen')
+def screen():
+    if not is_login():
+        return redirect( '/login?url=/screen')
+    return render_template( 'screen.html', timestamp=int(time.time()))
+
+@app.route( '/screenshot.png')
+def screenshot_png():
+    if not is_login():
+        abort( 401, 'Must login first')
+    pyautogui.screenshot( os.path.join( 'statics', 'screenshot.png'))
+    return send_from_directory( 'statics', 'screenshot.png')
+
 @app.route( '/login', methods=['POST','GET'])
 def login():
     if request.method == 'POST' and 'pass' in request.values:
@@ -282,6 +295,7 @@ def login():
 @app.route( '/favicon.ico')
 def icon():
     return send_from_directory( 'statics', 'favicon.ico')
+
 
 if __name__ == '__main__':
     abspath = os.path.abspath( __file__)
