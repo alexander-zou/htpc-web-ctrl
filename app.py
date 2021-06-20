@@ -13,7 +13,7 @@
 import os, time, hashlib, webbrowser
 from flask import Flask
 from flask import request
-from flask import render_template, redirect, abort, send_from_directory
+from flask import make_response, render_template, redirect, abort, send_from_directory
 import pyautogui, pyperclip
 
 PASS = '123'
@@ -114,21 +114,34 @@ def is_login():
         ts = request.cookies.get( 'ts')
         timepast = int( time.time()) - int( ts)
         if timepast < 0 or timepast > EXPIRATION_SEC:
-            return False
+            return False, dict()
         token = request.cookies.get( 'token')
-        return generate_token( ip, ts) == token
+        if generate_token( ip, ts) == token:
+            return True, dict()
     except:
-        return False
+        pass
+    if 'ps' in request.values and request.values[ 'ps'] == PASS:
+        ts = int( time.time())
+        token = generate_token( request.remote_addr, ts)
+        return True, { 'ts': str( ts), 'token': token}
+    return False, dict()
     
 @app.route( '/')
 def homepage():
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         return redirect( '/login?url=/')
-    return render_template( 'index.html', grid_btn_text=GRID_BUTTONS, fixed_btn_text=FIXED_BUTTONS)
+    page = make_response( render_template( 'index.html',
+                                        grid_btn_text=GRID_BUTTONS,
+                                        fixed_btn_text=FIXED_BUTTONS))
+    for k, v in update_cookies.items():
+        page.set_cookie( k, v)
+    return page
 
 @app.route( '/shelf')
 def shelf():
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         return redirect( '/login?url=/shelf')
     os.makedirs( UPLOAD_FOLDER, exist_ok=True)
     files = []
@@ -153,20 +166,23 @@ def text():
             open_page( txt, cmd)
         return 'OK'
     else:
-        if not is_login():
+        logged, update_cookies = is_login()
+        if not logged:
             return redirect( '/login?url=/text')
         return render_template( 'text.html')
 
 @app.route( '/input')
 def input():
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         return redirect( '/login?url=/input')
     return render_template( 'input.html')
 
 @app.route( '/api', methods=['POST','GET'])
 def api():
     global is_mouse_down
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         abort( 401, 'Must login first')
     if request.values[ 'evt'] == 'click':
         if is_mouse_down:
@@ -199,7 +215,8 @@ def api():
 
 @app.route( '/button', methods=['POST','GET'])
 def button():
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         abort( 401, 'Must login first')
     id = int( request.values[ 'id'])
     if request.values[ 't'] == 'fixed':
@@ -218,13 +235,15 @@ def button():
 
 @app.route( '/download/<string:name>')
 def download( name):
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         abort( 401, 'Must login first')
     return send_from_directory( 'shelf', name)
 
 @app.route( '/file/<string:op>/<string:file>', methods=['POST','GET'])
 def file_op( op, file):
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         abort( 401, 'Must login first')
     path = os.path.join( UPLOAD_FOLDER, file)
     if not os.path.exists( path):
@@ -237,7 +256,8 @@ def file_op( op, file):
 
 @app.route( '/upload', methods=['POST'])
 def upload():
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         abort( 401, 'Must login first')
     if 'file' not in request.files:
         abort( 400, 'Missing file')
@@ -258,16 +278,18 @@ def upload():
 
 @app.route( '/screen')
 def screen():
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         return redirect( '/login?url=/screen')
     return render_template( 'screen.html', timestamp=int(time.time()))
 
-@app.route( '/screenshot.png')
+@app.route( '/screenshot.jpg')
 def screenshot_png():
-    if not is_login():
+    logged, update_cookies = is_login()
+    if not logged:
         abort( 401, 'Must login first')
-    pyautogui.screenshot( os.path.join( 'statics', 'screenshot.png'))
-    return send_from_directory( 'statics', 'screenshot.png')
+    pyautogui.screenshot( os.path.join( 'statics', 'screenshot.jpg'))
+    return send_from_directory( 'statics', 'screenshot.jpg')
 
 @app.route( '/login', methods=['POST','GET'])
 def login():
@@ -291,6 +313,14 @@ def login():
     else:
         url = '/'
     return render_template( 'login.html', url=url)
+
+@app.route( '/shutdown', methods=[ 'POST'])
+def shutdown():
+    logged, update_cookies = is_login()
+    if not logged:
+        abort( 401, 'Must login first')
+    power_off()
+    return 'Bye'
 
 @app.route( '/favicon.ico')
 def icon():
