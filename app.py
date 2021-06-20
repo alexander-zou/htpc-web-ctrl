@@ -10,7 +10,7 @@
 
 '''
 
-import os, time, hashlib, webbrowser
+import os, threading, time, hashlib, webbrowser
 from flask import Flask
 from flask import request
 from flask import make_response, render_template, redirect, abort, send_from_directory
@@ -27,8 +27,17 @@ INVALID_FILENAMES = {
 }
 pyautogui.FAILSAFE = False
 
-def power_off():
-    os.system( 'shutdown -s -t 0')
+def hibernate( delay=0):
+    if delay > 0:
+        time.sleep( delay)
+    # print( 'Hibernate!')
+    os.system(r'rundll32.exe powrprof.dll,SetSuspendState Hibernate')
+
+def power_off( delay=0):
+    hibernate( delay)
+    # if delay > 0:
+    #     time.sleep( delay)
+    # os.system( 'shutdown -s -t 0')
     # print( 'Power Off!')
 
 def open_browser( browser=None):
@@ -319,7 +328,7 @@ def shutdown():
     logged, update_cookies = is_login()
     if not logged:
         abort( 401, 'Must login first')
-    power_off()
+    threading.Thread( target=power_off, args=(1,)).start()
     return 'Bye'
 
 @app.route( '/favicon.ico')
