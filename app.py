@@ -34,11 +34,11 @@ def hibernate( delay=0):
     os.system(r'rundll32.exe powrprof.dll,SetSuspendState Hibernate')
 
 def power_off( delay=0):
-    hibernate( delay)
-    # if delay > 0:
-    #     time.sleep( delay)
-    # os.system( 'shutdown -s -t 0')
-    # print( 'Power Off!')
+    # hibernate( delay)
+    if delay > 0:
+        time.sleep( delay)
+    os.system( 'shutdown -s -t 0')
+    print( 'Power Off!')
 
 def open_browser( browser=None):
     if browser is None:
@@ -209,14 +209,14 @@ def api():
             pyautogui.mouseDown()
             is_mouse_down = True
     elif request.values[ 'evt'] == 'move':
-        x, y = int( request.values[ 'x']), int( request.values[ 'y'])
+        x, y = float( request.values[ 'x']), float( request.values[ 'y'])
         l2 = x**2 + y**2
         k = l2/20000.0 + 1.05
         pyautogui.moveRel( x*k, y*k, 0.02)
     elif request.values[ 'evt'] == 'scroll':
-        x, y = int( request.values[ 'x']), int( request.values[ 'y'])
-        pyautogui.scroll( -y)
-        pyautogui.hscroll( -x)
+        x, y = float( request.values[ 'x']), float( request.values[ 'y'])
+        pyautogui.scroll( int(0.5+y))
+        pyautogui.hscroll( int(0.5+x))
     elif request.values[ 'evt'] == 'key':
         # print( 'KEY: ', request.values[ 'keys'].split( '|'))
         pyautogui.hotkey( *tuple( request.values[ 'keys'].split( '|')))
