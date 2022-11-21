@@ -26,8 +26,15 @@
 .power{
     color:red;
 }
-
+#touchpad {
+    width: 94%;
+    height: 100%;
+    margin-top: 30px;
+    background: #ccc;
+    border: grey solid 3px;
+}
 </style>
+
 
 <div style="margin-top:18px;max-width:480px;">
     <div class="fixed-row">
@@ -70,13 +77,116 @@
     </dev>
 </div>
 
+<canvas id="touchpad">
+    Your browser does not support canvas element!
+</canvas>
+
+
 <script>
+
+var ongoingTouches = [];
+var start_ts = 0;
+var most_fingers = 0;
 
 function call_api( url) {
     var xhttp = new XMLHttpRequest();
     xhttp.open("POST", url, false);
     xhttp.send();
 }
+
+function handleStart(evt) {
+  evt.preventDefault();
+  const el = document.getElementsByTagName("canvas")[0];
+  const ctx = el.getContext("2d");
+  const touches = evt.changedTouches;
+
+  if ( ongoingTouches.length <= 0) {
+    start_ts = Date.now();
+    most_fingers = 0;
+  } 
+  for (let i = 0; i < touches.length; i++) {
+    ongoingTouches.push(copyTouch(touches[i]));
+  }
+  if ( ongoingTouches.length > most_fingers) {
+    most_fingers = ongoingTouches.length;
+  }
+}
+
+function handleMove(evt) {
+  evt.preventDefault();
+  const touches = evt.changedTouches;
+  move_x = move_y = move_count = 0;
+  for (let i = 0; i < touches.length; i++) {
+    const idx = ongoingTouchIndexById(touches[i].identifier);
+    if (idx >= 0) {
+      move_x += touches[i].pageX - ongoingTouches[idx].pageX;
+      move_y += touches[i].pageY - ongoingTouches[idx].pageY;
+      ongoingTouches.splice(idx, 1, copyTouch(touches[i]));
+    }
+  }
+  if (ongoingTouches.length == 1) {
+    call_api( '/api?evt=move&x='+move_x+'&y='+move_y);
+  } else if (ongoingTouches.length == 2 && ( Math.abs( move_y) + Math.abs( move_x) >= 4)) {
+    call_api( '/api?evt=scroll&x='+move_x+'&y='+move_y);
+  }
+}
+
+function handleEnd(evt) {
+  evt.preventDefault();
+  touches = evt.changedTouches;
+
+  for (let i = 0; i < touches.length; i++) {
+    const idx = ongoingTouchIndexById(touches[i].identifier);
+    if (idx >= 0) {
+      ongoingTouches.splice(idx, 1);
+    }
+  }
+  if ( ongoingTouches.length <= 0 && Date.now() - start_ts < 240) {
+    if ( most_fingers == 1) {
+      call_api( '/api?evt=click');
+    } else if ( most_fingers == 2) {
+      call_api( '/api?evt=dbclick');
+    } else if ( most_fingers == 3) {
+      call_api( '/api?evt=drag');
+    }
+  }
+}
+
+function handleCancel(evt) {
+  evt.preventDefault();
+  const touches = evt.changedTouches;
+  for (let i = 0; i < touches.length; i++) {
+    const idx = ongoingTouchIndexById(touches[i].identifier);
+    ongoingTouches.splice(idx, 1);
+  }
+}
+
+function copyTouch(touch) {
+  return {
+    identifier: touch.identifier,
+    pageX: touch.pageX,
+    pageY: touch.pageY
+  };
+}
+
+function ongoingTouchIndexById(idToFind) {
+  for (let i = 0; i < ongoingTouches.length; i++) {
+    const id = ongoingTouches[i].identifier;
+
+    if (id == idToFind) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+window.onload = function startup() {
+  const el = document.getElementsByTagName("canvas")[0];
+  el.addEventListener("touchstart", handleStart, false);
+  el.addEventListener("touchend", handleEnd, false);
+  el.addEventListener("touchmove", handleMove, false);
+}
+
 
 </script>
 {% endblock %}
