@@ -10,7 +10,7 @@
 
 '''
 
-import os, threading, time, hashlib, webbrowser
+import os, threading, time, datetime, hashlib, webbrowser, threading
 from flask import Flask
 from flask import request
 from flask import make_response, render_template, redirect, abort, send_from_directory
@@ -86,6 +86,44 @@ GRID_BUTTON_FUNCTIONS = [
     'apps',
     ( 'win', 'up'),
 ]
+
+class ShutdownDeamon( threading.Thread):
+    Instance = None
+    TargetTime = None
+    Exiting = False
+    Func = None
+    def run( self):
+        while not ShutdownDeamon.Exiting:
+            time.sleep( 1)
+            if ShutdownDeamon.TargetTime is not None and datetime.datetime.now() > ShutdownDeamon.TargetTime:
+                ShutdownDeamon.TargetTime = None
+                if ShutdownDeamon.Func is not None:
+                    ShutdownDeamon.Func()
+        print( 'ShutdownDeamon Quiting...')
+    @staticmethod
+    def Setup( func, ts):
+        ShutdownDeamon.Exiting = False
+        ShutdownDeamon.TargetTime = ts
+        ShutdownDeamon.Func = func
+        if ShutdownDeamon.Instance is None or not ShutdownDeamon.Instance.is_alive():
+            ShutdownDeamon.Instance = ShutdownDeamon()
+            ShutdownDeamon.Instance.start()
+    @staticmethod
+    def TargetString():
+        if ShutdownDeamon.TargetTime is None:
+            return ''
+        return ShutdownDeamon.TargetTime.strftime( '%Y-%m-%d %H:%M')
+    @staticmethod
+    def IsSet():
+        return ShutdownDeamon.TargetTime is not None
+    @staticmethod
+    def Cancle():
+        ShutdownDeamon.TargetTime = None
+    @staticmethod
+    def ExitAndWait():
+        ShutdownDeamon.Exiting = True
+        if ShutdownDeamon.Instance is not None:
+            ShutdownDeamon.Instance.join()
 
 is_mouse_down = False
 
@@ -330,6 +368,27 @@ def shutdown():
         abort( 401, 'Must login first')
     threading.Thread( target=power_off, args=(1,)).start()
     return 'Bye'
+
+@app.route( '/shutdown_timer', methods=['POST','GET'])
+def shutdown_timer():
+    warning = ''
+    now = datetime.datetime.now()
+    if request.method == 'POST':
+        print( request.values)
+        if 't' not in request.values:
+            ShutdownDeamon.Cancle()
+        else:
+            target = datetime.datetime.strptime( request.values[ 't'], '%Y-%m-%dT%H:%M')
+            if target < now + datetime.timedelta( seconds=30):
+                warning = '定时须至少超过半分钟！'
+            else:
+                ShutdownDeamon.Setup( power_off, target)
+    dt = now + datetime.timedelta( hours=1) if ShutdownDeamon.TargetTime is None else ShutdownDeamon.TargetTime
+    return render_template( 'shutdown_timer.html',
+                                warning=warning,
+                                cur_set=ShutdownDeamon.IsSet(),
+                                cur_target=ShutdownDeamon.TargetString(),
+                                default_t=dt.strftime( '%Y-%m-%d %H:%M'))
 
 @app.route( '/favicon.ico')
 def icon():

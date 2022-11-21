@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Text{% endblock %}
+
+{% block content %}
+
+<style>
+    .button {
+        height:40px;
+        width: 80px;
+        line-height: 40px;
+        text-align: center;
+        margin: 4px;
+        display: inline-block;
+    }
+    .inputbox {
+        height:40px;
+        width:160px;
+        line-height: 40px;
+        text-align: center;
+        margin: 4px;
+        display: inline-block;
+    }
+    .warning {
+        color: rgb(211, 105, 57);
+    }
+</style>
+
+<div style="margin-top:54px">
+    {% if cur_set %}
+    <h3>
+    <form action="/shutdown_timer" method="post">
+        计划于 {{cur_target}} 关机！
+        <button class="button" type="submit">取消</button>
+    </form>
+    </h3>
+    {% else %}
+    <h3>尚未设置</h3>
+    {% endif %}
+    <br>
+    <p class="warning">
+        {{warning}}
+    </p>
+    <form action="/shutdown_timer" method="post">
+        <input class="inputbox" type="datetime-local" id="t" name="t" value="{{default_t}}">
+        <button class="button" type="submit">设定</button>
+    </form><br><br>
+
+</div>
+
+{% endblock %}
